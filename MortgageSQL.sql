@@ -41,6 +41,7 @@ UPDATE case_study.mortgage
 SET converted_30_year_fixed_mortgage_rate = CAST(REPLACE(30_year_fixed_mortgage_rate, '%', '') AS DECIMAL(5, 4)) / 100;
 
 -- REMOVE SPECIAL CHARACTERS (COMMA)
+
 UPDATE case_study.mortgage
 SET Median_home_listing_price = REPLACE(Median_home_listing_price, ',', '');
 UPDATE case_study.mortgage
@@ -51,12 +52,14 @@ UPDATE case_study.mortgage
 SET pv = REPLACE(pv, ',', '');
 
 -- TOP 10 CITIES WITH THE HIGHEST MORTGAGE AFFORDABILITY (BASED ON HOURS WORKED)
+
 SELECT * 
 FROM case_study.mortgage
 ORDER BY Number_of_hours_per_Month_to_afford_a_home DESC
 LIMIT 10;
 
 -- TOP 10 CITIES WITH THE LOWEST MORTGAGE AFFORDABILITY (BASED ON HOURS WORKED)
+
 SELECT * 
 FROM case_study.mortgage
 ORDER BY Number_of_hours_per_Month_to_afford_a_home
@@ -64,6 +67,7 @@ LIMIT 10;
 
 -- MEDIAN HOUSEHOLD INCOME CORRELATION WITH MORTGAGE PAYMENT
 -- FIND THE NUMERATOR
+
 SELECT
 SUM((Median_household_income - avg_income)*(Monthly_mortgage_payment - avg_mortgage)) AS NUMERATOR
 FROM case_study.mortgage,
@@ -73,6 +77,7 @@ AVG(Monthly_mortgage_payment) AS avg_mortgage
 FROM case_study.mortgage) AS averages; 
 
 -- FIND THE DENOMINATOR
+
 SELECT 
 SQRT(SUM(POW((Median_household_income - avg_income),2)))*SQRT(SUM(POW((Monthly_mortgage_payment - avg_mortgage),2))) AS DENOMINATOR
 FROM case_study.mortgage, 
@@ -82,6 +87,7 @@ AVG(Monthly_mortgage_payment) AS avg_mortgage
 FROM case_study.mortgage) AS averages; 
 
 -- CALCULATE THE CORRELATION COEFFICIENT
+
 SELECT 
 ROUND((NUMERATOR / DENOMINATOR),2) AS CORRELATION
 FROM
@@ -95,6 +101,7 @@ AVG(Monthly_mortgage_payment) AS avg_mortgage
 FROM case_study.mortgage) AS averages) AS FINAL;
 
 -- CALCULATE THE VARIANCE FROM STATES THAT HAVE MORE THAN 3 BIG CITIES
+
 SELECT 
 COUNT(city) AS total_city, 
 State,
@@ -109,7 +116,8 @@ WHERE state IN (
 GROUP BY State
 ORDER BY variance_of_hours DESC;
 
--- TOP 10 CITIES WITH THE HIGHEST MORTGAGE TO INCOME RATIO
+-- TOP 10 CITIES WITH THE HIGHEST MORTGAGE-TO-INCOME RATIO
+
 SELECT 
 City, 
 State, 
@@ -121,6 +129,7 @@ ORDER BY Mortgage_to_income_ratio DESC
 LIMIT 10;
 
 -- INCOME HOUSING GAP 
+
 SELECT 
 City, 
 State, 
