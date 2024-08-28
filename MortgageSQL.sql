@@ -96,15 +96,15 @@ FROM case_study.mortgage) AS averages) AS FINAL;
 
 -- CALCULATE THE VARIANCE FROM STATES THAT HAVE MORE THAN 3 BIG CITIES
 SELECT 
-	COUNT(city) AS total_city, State,
-    VARIANCE(Number_of_hours_per_Month_to_afford_a_home) AS Variance_of_hours
-FROM 
-    case_study.mortgage
+COUNT(city) AS total_city, 
+State,
+VARIANCE(Number_of_hours_per_Month_to_afford_a_home) AS Variance_of_hours
+FROM case_study.mortgage
 WHERE state IN (
 	SELECT state
-	from case_study.mortgage
-	group by state
-	having count(city) > 3
+	FROM case_study.mortgage
+	GROUP BY state
+	HAVING count(city) > 3
     ) 
 GROUP BY State
 ORDER BY variance_of_hours DESC;
