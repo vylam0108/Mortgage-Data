@@ -21,6 +21,11 @@ RENAME COLUMN `median household income` TO Median_household_income;
 ALTER TABLE case_study.mortgage
 RENAME COLUMN `Number of hours per Month to afford a home` TO Number_of_hours_per_Month_to_afford_a_home;
 
+-- ALTER COLUMN DATA TYPE
+
+ALTER TABLE case_study.mortgage
+MODIFY COLUMN Number_of_hours_per_Month_to_afford_a_home INT;
+
 -- DATA CLEANING
 -- REMOVE SPECIAL CHARACTER ($)
 
@@ -53,14 +58,14 @@ SET pv = REPLACE(pv, ',', '');
 
 -- TOP 10 CITIES WITH THE HIGHEST MORTGAGE AFFORDABILITY (BASED ON HOURS WORKED)
 
-SELECT * 
+SELECT City, State, Number_of_hours_per_Month_to_afford_a_home
 FROM case_study.mortgage
 ORDER BY Number_of_hours_per_Month_to_afford_a_home DESC
 LIMIT 10;
 
 -- TOP 10 CITIES WITH THE LOWEST MORTGAGE AFFORDABILITY (BASED ON HOURS WORKED)
 
-SELECT * 
+SELECT City, State, Number_of_hours_per_Month_to_afford_a_home
 FROM case_study.mortgage
 ORDER BY Number_of_hours_per_Month_to_afford_a_home
 LIMIT 10;
@@ -98,14 +103,13 @@ FROM case_study.mortgage,
 (SELECT 
 AVG(Median_household_income) AS avg_income,
 AVG(Monthly_mortgage_payment) AS avg_mortgage
-FROM case_study.mortgage) AS averages) AS FINAL;
+FROM case_study.mortgage) AS averages) AS final;
 
--- CALCULATE THE VARIANCE FROM STATES THAT HAVE MORE THAN 3 BIG CITIES
+-- CALCULATE THE VARIANCE OF STATES THAT HAVE MORE THAN 3 BIG CITIES
 
 SELECT 
-COUNT(city) AS total_city, 
-State,
-VARIANCE(Number_of_hours_per_Month_to_afford_a_home) AS Variance_of_hours
+COUNT(city) AS total_city, State,
+ROUND(VARIANCE(Number_of_hours_per_Month_to_afford_a_home),2) AS Variance_of_hours
 FROM case_study.mortgage
 WHERE state IN (
 	SELECT state
@@ -115,6 +119,22 @@ WHERE state IN (
     ) 
 GROUP BY State
 ORDER BY variance_of_hours DESC;
+
+-- CALCULATE THE RANGE OF STATES THAT HAVE MORE THAN 2 BIG CITIES
+
+SELECT 
+State, 
+MIN(Number_of_hours_per_Month_to_afford_a_home) AS MIN_HOURS,
+MAX(Number_of_hours_per_Month_to_afford_a_home) AS MAX_HOURS,
+MAX(Number_of_hours_per_Month_to_afford_a_home)-MIN(Number_of_hours_per_Month_to_afford_a_home) AS HOURS_RANGE
+FROM case_study.mortgage
+WHERE State IN 
+	(SELECT STATE
+	FROM case_study.mortgage
+	GROUP BY State
+	HAVING COUNT(CITY) > 2)
+GROUP BY State
+ORDER BY HOURS_RANGE DESC;
 
 -- TOP 10 CITIES WITH THE HIGHEST MORTGAGE-TO-INCOME RATIO
 
@@ -128,7 +148,7 @@ FROM case_study.mortgage
 ORDER BY Mortgage_to_income_ratio DESC
 LIMIT 10;
 
--- INCOME HOUSING GAP 
+-- TOP 10 CITIES WITH THE LOWEST INCOME HOUSING GAP 
 
 SELECT 
 City, 
@@ -138,5 +158,6 @@ Monthly_mortgage_payment,
 (Median_household_income - (Monthly_mortgage_payment * 12)) AS Income_housing_gap,
 ROUND((((Monthly_mortgage_payment * 12)/Median_household_income)*100),2) AS Mortgage_to_income_ratio
 FROM case_study.mortgage
-ORDER BY INCOME_HOUSING_GAP;
+ORDER BY Income_housing_gap
+LIMIT 10;
 
